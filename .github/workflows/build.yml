@@ -23,7 +23,7 @@ jobs:
       - name: Accept SDK Licenses
         run: yes | sdkmanager --licenses 2>/dev/null || true
 
-      - name: Install SDK Platforms
+      - name: Install SDK Platforms & Build Tools
         run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Cache Gradle packages
@@ -35,24 +35,11 @@ jobs:
           key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-
 
-      - name: Create gradlew
-        run: |
-          cat > gradlew << 'EOF'
-          #!/bin/sh
-          exec gradle "$@"
-          EOF
-          chmod +x gradlew
-
-      - name: Install Gradle
-        run: |
-          GRADLE_VERSION=8.4
-          wget -q https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip
-          unzip -q gradle-${GRADLE_VERSION}-bin.zip
-          export PATH=$PWD/gradle-${GRADLE_VERSION}/bin:$PATH
-          echo "PATH=$PWD/gradle-${GRADLE_VERSION}/bin:$PATH" >> $GITHUB_ENV
-
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build Debug APK
         run: gradle assembleDebug
@@ -62,3 +49,10 @@ jobs:
         with:
           name: dreamword-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Build Log on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: app/build/reports/
