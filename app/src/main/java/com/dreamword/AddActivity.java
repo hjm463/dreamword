@@ -60,7 +60,7 @@ public class AddActivity extends AppCompatActivity {
         }
 
         Pattern chinesePattern = Pattern.compile("[\\u4e00-\\u9fff]");
-        var matcher = chinesePattern.matcher(text);
+        java.util.regex.Matcher matcher = chinesePattern.matcher(text);
         if (matcher.find()) {
             int idx = matcher.start();
             String eng = text.substring(0, idx).trim();
