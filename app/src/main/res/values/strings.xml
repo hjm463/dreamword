@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">单词学习</string>
+    <string name="title_add">添加单词</string>
+    <string name="title_review">背诵</string>
+    <string name="title_book">单词簿</string>
+    <string name="hint_input">例如：apple 苹果</string>
+    <string name="btn_add">加入单词簿</string>
+    <string name="btn_review">开始背诵</string>
+    <string name="btn_book">单词簿</string>
+    <string name="btn_pronounce">朗读</string>
+    <string name="btn_hint">提示</string>
+    <string name="btn_check">检查答案</string>
+    <string name="btn_next">下一个</string>
+    <string name="btn_back">返回</string>
+    <string name="empty_book">单词簿为空，先添加一些单词吧</string>
+    <string name="all_mastered">所有单词已掌握！</string>
+    <string name="round_complete">本轮完成！</string>
+</resources>
