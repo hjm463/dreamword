@@ -28,9 +28,9 @@ public class MainActivity extends AppCompatActivity {
         CardView btnReview = findViewById(R.id.btnReview);
         CardView btnBook = findViewById(R.id.btnBook);
 
-        btnAdd.setOnClickListener(v -> startActivity(new Intent(this, AddActivity.class)));
-        btnReview.setOnClickListener(v -> startActivity(new Intent(this, ReviewActivity.class)));
-        btnBook.setOnClickListener(v -> startActivity(new Intent(this, BookActivity.class)));
+        btnAdd.setOnClickListener(v -> { try { startActivity(new Intent(this, AddActivity.class)); } catch (Exception e) { e.printStackTrace(); } });
+        btnReview.setOnClickListener(v -> { try { startActivity(new Intent(this, ReviewActivity.class)); } catch (Exception e) { e.printStackTrace(); } });
+        btnBook.setOnClickListener(v -> { try { startActivity(new Intent(this, BookActivity.class)); } catch (Exception e) { e.printStackTrace(); } });
     }
 
     @Override

@@ -37,9 +37,9 @@ public class BookActivity extends AppCompatActivity {
         CardView btnRefresh = findViewById(R.id.btnRefresh);
         CardView btnClear = findViewById(R.id.btnClear);
 
-        btnBack.setOnClickListener(v -> finish());
-        btnRefresh.setOnClickListener(v -> refreshList());
-        btnClear.setOnClickListener(v -> showClearConfirm());
+        btnBack.setOnClickListener(v -> { try { finish(); } catch (Exception e) { e.printStackTrace(); } });
+        btnRefresh.setOnClickListener(v -> { try { refreshList(); } catch (Exception e) { e.printStackTrace(); } });
+        btnClear.setOnClickListener(v -> { try { showClearConfirm(); } catch (Exception e) { e.printStackTrace(); } });
 
         rvWords.setLayoutManager(new LinearLayoutManager(this));
         refreshList();

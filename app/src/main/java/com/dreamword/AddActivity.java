@@ -28,8 +28,8 @@ public class AddActivity extends AppCompatActivity {
         TextView btnBack = findViewById(R.id.btnBack);
         CardView btnAddWord = findViewById(R.id.btnAddWord);
 
-        btnBack.setOnClickListener(v -> finish());
-        btnAddWord.setOnClickListener(v -> doAddWord());
+        btnBack.setOnClickListener(v -> { try { finish(); } catch (Exception e) { e.printStackTrace(); } });
+        btnAddWord.setOnClickListener(v -> { try { doAddWord(); } catch (Exception e) { e.printStackTrace(); } });
     }
 
     private void doAddWord() {
