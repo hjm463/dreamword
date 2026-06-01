@@ -197,7 +197,10 @@
                             android:text="上一页"
                             android:textColor="@color/text_cream"
                             android:background="@color/card_bg"
-                            android:padding="8dp 16dp"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
                             android:textSize="14sp"/>
 
                         <TextView
@@ -207,7 +210,8 @@
                             android:text="第 1 / 1 页"
                             android:textColor="@color/text_muted"
                             android:textSize="14sp"
-                            android:padding="0 16dp"/>
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"/>
 
                         <Button
                             android:id="@+id/btnNextPage"
@@ -216,7 +220,10 @@
                             android:text="下一页"
                             android:textColor="@color/text_cream"
                             android:background="@color/card_bg"
-                            android:padding="8dp 16dp"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
                             android:textSize="14sp"/>
                     </LinearLayout>
                 </LinearLayout>
