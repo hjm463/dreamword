@@ -38,7 +38,7 @@ public class DictionaryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dictionary);
 
         dictionaryManager = DictionaryManager.getInstance();
-        dictionaryManager.loadDictionary(this);
+        dictionaryManager.loadDictionary();
         wordStore = new WordStore(this);
 
         stageSpinner = findViewById(R.id.spinnerStage);

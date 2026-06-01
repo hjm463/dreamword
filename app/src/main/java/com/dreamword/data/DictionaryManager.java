@@ -24,11 +24,11 @@ public class DictionaryManager {
         return instance;
     }
 
-    public void loadDictionary(Context context) {
+    public void loadDictionary() {
         if (loaded) return;
         
         try {
-            String json = DictionaryData.getDictionaryJson(context);
+            String json = DictionaryData.getDictionaryJson();
             if (json != null) {
                 Type type = new TypeToken<DictionaryData>() {}.getType();
                 dictionaryData = gson.fromJson(json, type);

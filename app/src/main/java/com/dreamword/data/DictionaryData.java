@@ -1,11 +1,9 @@
 package com.dreamword.data;
 
-import android.content.Context;
 import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 public class DictionaryData {
@@ -29,18 +27,6 @@ public class DictionaryData {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    public static String getDictionaryJson(Context context) {
-        try {
-            InputStream is = context.getResources().openRawResource(R.raw.dictionary);
-            byte[] buffer = new byte[is.available()];
-            is.read(buffer);
-            is.close();
-            return new String(buffer);
-        } catch (IOException e) {
-            return getDictionaryJson();
         }
     }
 }
