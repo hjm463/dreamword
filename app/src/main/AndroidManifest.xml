@@ -27,5 +27,11 @@
         <activity
             android:name=".BookActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".DictionaryActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".TranslateActivity"
+            android:screenOrientation="portrait" />
     </application>
 </manifest>
