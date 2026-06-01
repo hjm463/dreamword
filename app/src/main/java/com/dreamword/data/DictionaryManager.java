@@ -1,13 +1,5 @@
 package com.dreamword.data;
 
-import android.os.AsyncTask;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,11 +10,6 @@ public class DictionaryManager {
     private List<String> stages = new ArrayList<>();
     private List<Grade> grades = new ArrayList<>();
 
-    public interface LoadCallback {
-        void onSuccess();
-        void onError(String error);
-    }
-
     public static synchronized DictionaryManager getInstance() {
         if (instance == null) {
             instance = new DictionaryManager();
@@ -30,53 +17,61 @@ public class DictionaryManager {
         return instance;
     }
 
-    public void loadDictionary(LoadCallback callback) {
-        if (loaded) {
-            callback.onSuccess();
-            return;
-        }
+    public void loadDictionary() {
+        if (loaded) return;
         
-        new FetchWordTask(callback).execute();
+        buildFullDictionary();
+        loaded = true;
     }
 
-    private class FetchWordTask extends AsyncTask<Void, Void, Boolean> {
-        private LoadCallback callback;
-        private String errorMessage;
-
-        FetchWordTask(LoadCallback callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                buildFullDictionary();
-                return true;
-            } catch (Exception e) {
-                errorMessage = e.getMessage();
-                buildMockDictionary();
-                return true;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Boolean success) {
-            loaded = true;
-            if (success) {
-                callback.onSuccess();
-            } else {
-                callback.onError(errorMessage);
-            }
-        }
-    }
-
-    private void buildFullDictionary() throws IOException {
+    private void buildFullDictionary() {
         versions.add("人教版");
         versions.add("外研版");
         
         stages.add("小学");
         stages.add("初中");
         stages.add("高中");
+
+        String[][] primaryWords = {
+            {"apple", "苹果"}, {"ant", "蚂蚁"}, {"boy", "男孩"}, {"book", "书"}, {"cake", "蛋糕"},
+            {"cat", "猫"}, {"dog", "狗"}, {"desk", "书桌"}, {"egg", "鸡蛋"}, {"fish", "鱼"},
+            {"girl", "女孩"}, {"hand", "手"}, {"ice", "冰"}, {"juice", "果汁"}, {"kite", "风筝"},
+            {"lion", "狮子"}, {"milk", "牛奶"}, {"nose", "鼻子"}, {"orange", "橙子"}, {"pig", "猪"},
+            {"queen", "女王"}, {"rabbit", "兔子"}, {"sun", "太阳"}, {"tree", "树"}, {"umbrella", "雨伞"},
+            {"van", "货车"}, {"water", "水"}, {"yellow", "黄色"}, {"zebra", "斑马"}, {"bird", "鸟"},
+            {"car", "汽车"}, {"door", "门"}, {"flower", "花"}, {"garden", "花园"}, {"home", "家"},
+            {"island", "岛屿"}, {"jump", "跳"}, {"king", "国王"}, {"love", "爱"}, {"money", "钱"}
+        };
+
+        String[][] juniorWords = {
+            {"ability", "能力"}, {"accept", "接受"}, {"achieve", "实现"}, {"action", "行动"}, {"advice", "建议"},
+            {"afford", "负担得起"}, {"agree", "同意"}, {"alive", "活着的"}, {"allow", "允许"}, {"alone", "独自"},
+            {"amazing", "令人惊讶的"}, {"appear", "出现"}, {"area", "区域"}, {"argue", "争论"}, {"arrive", "到达"},
+            {"article", "文章"}, {"asleep", "睡着的"}, {"attention", "注意"}, {"attract", "吸引"}, {"avoid", "避免"},
+            {"balance", "平衡"}, {"beautiful", "美丽的"}, {"because", "因为"}, {"become", "成为"}, {"before", "之前"},
+            {"begin", "开始"}, {"believe", "相信"}, {"between", "在...之间"}, {"beyond", "超过"}, {"blind", "盲的"},
+            {"blood", "血液"}, {"blue", "蓝色"}, {"board", "木板"}, {"borrow", "借"}, {"break", "打破"},
+            {"bring", "带来"}, {"build", "建造"}, {"business", "商业"}, {"busy", "忙碌的"}, {"butterfly", "蝴蝶"},
+            {"camera", "相机"}, {"capital", "首都"}, {"careful", "小心的"}, {"carry", "携带"}, {"celebrate", "庆祝"},
+            {"change", "改变"}, {"cheer", "欢呼"}, {"choose", "选择"}, {"collect", "收集"}, {"comfortable", "舒适的"},
+            {"common", "普通的"}, {"compare", "比较"}, {"complete", "完成"}, {"consider", "考虑"}, {"continue", "继续"},
+            {"control", "控制"}, {"cost", "花费"}, {"create", "创造"}, {"culture", "文化"}, {"daily", "日常的"}
+        };
+
+        String[][] seniorWords = {
+            {"abandon", "放弃"}, {"ability", "能力"}, {"aboard", "在船上"}, {"absence", "缺席"}, {"absolute", "绝对的"},
+            {"abstract", "抽象的"}, {"academic", "学术的"}, {"accelerate", "加速"}, {"access", "通道，访问"}, {"accommodate", "容纳"},
+            {"accompany", "陪伴"}, {"accomplish", "完成"}, {"accordance", "按照"}, {"account", "账户，描述"}, {"accumulate", "积累"},
+            {"accurate", "准确的"}, {"acknowledge", "承认"}, {"acquire", "获得"}, {"adapt", "适应"}, {"adequate", "足够的"},
+            {"adjust", "调整"}, {"administer", "管理"}, {"admirable", "令人钦佩的"}, {"admission", "录取"}, {"adopt", "采用，收养"},
+            {"advocate", "提倡"}, {"affirm", "确认"}, {"affluent", "富裕的"}, {"agenda", "议程"}, {"aggression", "侵略"},
+            {"aggressive", "侵略性的"}, {"agony", "痛苦"}, {"agriculture", "农业"}, {"aircraft", "飞机"}, {"alarm", "警报"},
+            {"album", "相册"}, {"alcohol", "酒精"}, {"alert", "警觉的"}, {"alliance", "联盟"}, {"allocate", "分配"},
+            {"alter", "改变"}, {"alternative", "替代的"}, {"ambassador", "大使"}, {"ambiguous", "模糊的"}, {"ambitious", "有野心的"},
+            {"ample", "充足的"}, {"amplify", "放大"}, {"analyze", "分析"}, {"ancestor", "祖先"}, {"anchor", "锚"},
+            {"ancient", "古代的"}, {"anniversary", "周年"}, {"anonymous", "匿名的"}, {"anticipate", "预期"}, {"apparent", "明显的"},
+            {"appreciate", "欣赏"}, {"apprehension", "理解，忧虑"}, {"appropriate", "适当的"}, {"approval", "批准"}, {"approximate", "近似的"}
+        };
 
         String[] primaryBooks = {"三年级上册", "三年级下册", "四年级上册", "四年级下册", "五年级上册", "五年级下册", "六年级上册", "六年级下册"};
         String[] juniorBooks = {"七年级上册", "七年级下册", "八年级上册", "八年级下册", "九年级全一册"};
@@ -89,7 +84,7 @@ public class DictionaryManager {
                 grade.name = primaryBooks[i];
                 grade.stage = "小学";
                 grade.version = version;
-                grade.words = fetchWordsForBook(version, "小学", primaryBooks[i]);
+                grade.words = getWordsForBook(primaryWords, i, 8);
                 grades.add(grade);
             }
 
@@ -99,7 +94,7 @@ public class DictionaryManager {
                 grade.name = juniorBooks[i];
                 grade.stage = "初中";
                 grade.version = version;
-                grade.words = fetchWordsForBook(version, "初中", juniorBooks[i]);
+                grade.words = getWordsForBook(juniorWords, i, 12);
                 grades.add(grade);
             }
 
@@ -109,182 +104,21 @@ public class DictionaryManager {
                 grade.name = seniorBooks[i];
                 grade.stage = "高中";
                 grade.version = version;
-                grade.words = fetchWordsForBook(version, "高中", seniorBooks[i]);
+                grade.words = getWordsForBook(seniorWords, i, 15);
                 grades.add(grade);
             }
         }
     }
 
-    private List<WordItem> fetchWordsForBook(String version, String stage, String book) throws IOException {
+    private List<WordItem> getWordsForBook(String[][] wordPool, int bookIndex, int count) {
         List<WordItem> words = new ArrayList<>();
+        int start = bookIndex * count;
         
-        String keyword = version + stage + book + "英语单词";
-        String urlStr = "https://dict.youdao.com/suggest?q=" + URLEncoder.encode(keyword, "UTF-8") + "&num=30&doctype=json";
+        for (int i = 0; i < count && start + i < wordPool.length; i++) {
+            words.add(new WordItem(wordPool[start + i][0], wordPool[start + i][1]));
+        }
         
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-
-            if (conn.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                reader.close();
-                conn.disconnect();
-
-                String json = sb.toString();
-                if (json.contains("\"entries\"")) {
-                    int entriesStart = json.indexOf("\"entries\":[");
-                    int entriesEnd = json.indexOf("]", entriesStart);
-                    
-                    if (entriesStart > 0 && entriesEnd > entriesStart) {
-                        String entriesStr = json.substring(entriesStart + 11, entriesEnd);
-                        String[] items = entriesStr.split("\\},\\{");
-                        
-                        for (String item : items) {
-                            String word = extractValue(item, "\"word\":\"", "\"");
-                            String explain = extractValue(item, "\"explain\":\"", "\"");
-                            
-                            if (word != null && word.matches("^[A-Za-z]+$") && word.length() > 1) {
-                                if (explain != null) {
-                                    explain = explain.replaceAll("^\\[[^\\]]+\\]", "").trim();
-                                    explain = explain.replaceAll("^[a-z]+\\.\\s*", "").trim();
-                                    String[] parts = explain.split("[;；]");
-                                    if (parts.length > 0) {
-                                        explain = parts[0].trim();
-                                    }
-                                } else {
-                                    explain = "暂无释义";
-                                }
-                                words.add(new WordItem(word, explain));
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            words.addAll(generateDefaultWords(book));
-        }
-
-        if (words.isEmpty()) {
-            words.addAll(generateDefaultWords(book));
-        }
-
         return words;
-    }
-
-    private String extractValue(String json, String start, String end) {
-        int startIdx = json.indexOf(start);
-        if (startIdx == -1) return null;
-        
-        int valueStart = startIdx + start.length();
-        int endIdx = json.indexOf(end, valueStart);
-        if (endIdx == -1) return null;
-        
-        String value = json.substring(valueStart, endIdx);
-        return value.replace("\\u002F", "/").replace("\\\"", "\"");
-    }
-
-    private List<WordItem> generateDefaultWords(String book) {
-        List<WordItem> words = new ArrayList<>();
-        String[][] wordPool = {
-            {"apple", "苹果"}, {"banana", "香蕉"}, {"cat", "猫"}, {"dog", "狗"},
-            {"elephant", "大象"}, {"fish", "鱼"}, {"garden", "花园"}, {"happy", "快乐的"},
-            {"island", "岛屿"}, {"jungle", "丛林"}, {"knowledge", "知识"}, {"library", "图书馆"},
-            {"mountain", "山"}, {"nature", "自然"}, {"orange", "橙子"}, {"people", "人们"},
-            {"question", "问题"}, {"rainbow", "彩虹"}, {"sunshine", "阳光"}, {"teacher", "老师"},
-            {"umbrella", "雨伞"}, {"vegetable", "蔬菜"}, {"water", "水"}, {"yellow", "黄色"},
-            {"zebra", "斑马"}, {"beautiful", "美丽的"}, {"computer", "电脑"}, {"different", "不同的"},
-            {"example", "例子"}, {"favorite", "最喜欢的"}, {"general", "一般的"}, {"history", "历史"},
-            {"important", "重要的"}, {"journey", "旅程"}, {"kitchen", "厨房"}, {"language", "语言"}
-        };
-
-        int start = book.hashCode() % 10;
-        for (int i = start; i < Math.min(start + 15, wordPool.length); i++) {
-            words.add(new WordItem(wordPool[i][0], wordPool[i][1]));
-        }
-
-        return words;
-    }
-
-    private void buildMockDictionary() {
-        versions.clear();
-        stages.clear();
-        grades.clear();
-
-        versions.add("人教版");
-        versions.add("外研版");
-        
-        stages.add("小学");
-        stages.add("初中");
-        stages.add("高中");
-
-        String[] primaryBooks = {"三年级上册", "三年级下册", "四年级上册", "四年级下册", "五年级上册", "五年级下册", "六年级上册", "六年级下册"};
-        String[] juniorBooks = {"七年级上册", "七年级下册", "八年级上册", "八年级下册", "九年级全一册"};
-        String[] seniorBooks = {"必修第一册", "必修第二册", "必修第三册", "选择性必修第一册", "选择性必修第二册", "选择性必修第三册"};
-
-        String[][] wordPool = {
-            {"apple", "苹果"}, {"banana", "香蕉"}, {"cat", "猫"}, {"dog", "狗"}, {"elephant", "大象"},
-            {"fish", "鱼"}, {"garden", "花园"}, {"happy", "快乐的"}, {"island", "岛屿"}, {"jungle", "丛林"},
-            {"knowledge", "知识"}, {"library", "图书馆"}, {"mountain", "山"}, {"nature", "自然"}, {"orange", "橙子"},
-            {"people", "人们"}, {"question", "问题"}, {"rainbow", "彩虹"}, {"sunshine", "阳光"}, {"teacher", "老师"},
-            {"umbrella", "雨伞"}, {"vegetable", "蔬菜"}, {"water", "水"}, {"yellow", "黄色"}, {"zebra", "斑马"},
-            {"beautiful", "美丽的"}, {"computer", "电脑"}, {"different", "不同的"}, {"example", "例子"}, {"favorite", "最喜欢的"},
-            {"general", "一般的"}, {"history", "历史"}, {"important", "重要的"}, {"journey", "旅程"}, {"kitchen", "厨房"}
-        };
-
-        for (String version : versions) {
-            for (int i = 0; i < primaryBooks.length; i++) {
-                Grade grade = new Grade();
-                grade.id = version + "_primary_" + (i + 1);
-                grade.name = primaryBooks[i];
-                grade.stage = "小学";
-                grade.version = version;
-                grade.words = new ArrayList<>();
-                
-                int start = (version.hashCode() + i) % wordPool.length;
-                for (int j = 0; j < 10 && start + j < wordPool.length; j++) {
-                    grade.words.add(new WordItem(wordPool[start + j][0], wordPool[start + j][1]));
-                }
-                grades.add(grade);
-            }
-
-            for (int i = 0; i < juniorBooks.length; i++) {
-                Grade grade = new Grade();
-                grade.id = version + "_junior_" + (i + 1);
-                grade.name = juniorBooks[i];
-                grade.stage = "初中";
-                grade.version = version;
-                grade.words = new ArrayList<>();
-                
-                int start = (version.hashCode() + primaryBooks.length + i) % wordPool.length;
-                for (int j = 0; j < 12 && start + j < wordPool.length; j++) {
-                    grade.words.add(new WordItem(wordPool[start + j][0], wordPool[start + j][1]));
-                }
-                grades.add(grade);
-            }
-
-            for (int i = 0; i < seniorBooks.length; i++) {
-                Grade grade = new Grade();
-                grade.id = version + "_senior_" + (i + 1);
-                grade.name = seniorBooks[i];
-                grade.stage = "高中";
-                grade.version = version;
-                grade.words = new ArrayList<>();
-                
-                int start = (version.hashCode() + primaryBooks.length + juniorBooks.length + i) % wordPool.length;
-                for (int j = 0; j < 15 && start + j < wordPool.length; j++) {
-                    grade.words.add(new WordItem(wordPool[start + j][0], wordPool[start + j][1]));
-                }
-                grades.add(grade);
-            }
-        }
     }
 
     public List<String> getVersions() {

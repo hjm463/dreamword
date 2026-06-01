@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,7 +33,11 @@ public class DictionaryActivity extends AppCompatActivity {
     private List<String> wordList;
     private List<WordItem> currentWords;
     private Grade currentBook;
-    private TextView tvLoading;
+    private TextView tvPageInfo;
+    private Button btnPrevPage;
+    private Button btnNextPage;
+    private int currentPage = 0;
+    private static final int PAGE_SIZE = 8;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +45,16 @@ public class DictionaryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dictionary);
 
         dictionaryManager = DictionaryManager.getInstance();
+        dictionaryManager.loadDictionary();
         wordStore = new WordStore(this);
 
-        tvLoading = findViewById(R.id.tvLoading);
         versionSpinner = findViewById(R.id.spinnerVersion);
         stageSpinner = findViewById(R.id.spinnerStage);
         bookSpinner = findViewById(R.id.spinnerBook);
         wordListView = findViewById(R.id.lvWords);
+        tvPageInfo = findViewById(R.id.tvPageInfo);
+        btnPrevPage = findViewById(R.id.btnPrevPage);
+        btnNextPage = findViewById(R.id.btnNextPage);
         CardView btnAddSelected = findViewById(R.id.btnAddSelected);
         CardView btnStartReview = findViewById(R.id.btnStartReview);
         TextView btnBack = findViewById(R.id.btnBack);
@@ -56,7 +64,7 @@ public class DictionaryActivity extends AppCompatActivity {
         wordListView.setAdapter(wordAdapter);
         wordListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        loadDictionaryAsync();
+        loadVersions();
 
         versionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -81,11 +89,26 @@ public class DictionaryActivity extends AppCompatActivity {
         bookSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentPage = 0;
                 loadWords();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        btnPrevPage.setOnClickListener(v -> {
+            if (currentPage > 0) {
+                currentPage--;
+                loadWords();
+            }
+        });
+
+        btnNextPage.setOnClickListener(v -> {
+            if (currentWords != null && (currentPage + 1) * PAGE_SIZE < currentWords.size()) {
+                currentPage++;
+                loadWords();
+            }
         });
 
         btnBack.setOnClickListener(v -> finish());
@@ -97,9 +120,11 @@ public class DictionaryActivity extends AppCompatActivity {
             }
 
             int count = 0;
+            List<WordItem> displayedWords = getCurrentPageWords();
+            
             for (int i = 0; i < wordListView.getCount(); i++) {
                 if (wordListView.isItemChecked(i)) {
-                    WordItem item = currentWords.get(i);
+                    WordItem item = displayedWords.get(i);
                     wordStore.addWord(item.english, item.chinese);
                     count++;
                 }
@@ -119,9 +144,14 @@ public class DictionaryActivity extends AppCompatActivity {
             }
 
             ArrayList<String> selectedWords = new ArrayList<>();
-            for (int i = 0; i < wordListView.getCount(); i++) {
-                if (wordListView.isItemChecked(i)) {
-                    WordItem item = currentWords.get(i);
+            
+            for (int i = 0; i < currentWords.size(); i++) {
+                int globalIndex = i;
+                int page = globalIndex / PAGE_SIZE;
+                int localIndex = globalIndex % PAGE_SIZE;
+                
+                if (page == currentPage && wordListView.isItemChecked(localIndex)) {
+                    WordItem item = currentWords.get(globalIndex);
                     wordStore.addWord(item.english, item.chinese);
                     selectedWords.add(item.english);
                 }
@@ -138,36 +168,18 @@ public class DictionaryActivity extends AppCompatActivity {
         });
     }
 
-    private void loadDictionaryAsync() {
-        tvLoading.setVisibility(View.VISIBLE);
-        versionSpinner.setEnabled(false);
-        stageSpinner.setEnabled(false);
-        bookSpinner.setEnabled(false);
-
-        dictionaryManager.loadDictionary(new DictionaryManager.LoadCallback() {
-            @Override
-            public void onSuccess() {
-                runOnUiThread(() -> {
-                    tvLoading.setVisibility(View.GONE);
-                    versionSpinner.setEnabled(true);
-                    stageSpinner.setEnabled(true);
-                    bookSpinner.setEnabled(true);
-                    loadVersions();
-                });
-            }
-
-            @Override
-            public void onError(String error) {
-                runOnUiThread(() -> {
-                    tvLoading.setVisibility(View.GONE);
-                    versionSpinner.setEnabled(true);
-                    stageSpinner.setEnabled(true);
-                    bookSpinner.setEnabled(true);
-                    loadVersions();
-                    Toast.makeText(DictionaryActivity.this, "网络加载失败，使用本地词库", Toast.LENGTH_SHORT).show();
-                });
-            }
-        });
+    private List<WordItem> getCurrentPageWords() {
+        if (currentWords == null) return new ArrayList<>();
+        
+        List<WordItem> pageWords = new ArrayList<>();
+        int start = currentPage * PAGE_SIZE;
+        int end = Math.min(start + PAGE_SIZE, currentWords.size());
+        
+        for (int i = start; i < end; i++) {
+            pageWords.add(currentWords.get(i));
+        }
+        
+        return pageWords;
     }
 
     private void loadVersions() {
@@ -220,16 +232,40 @@ public class DictionaryActivity extends AppCompatActivity {
         }
 
         wordList.clear();
-        if (currentWords != null) {
-            for (WordItem item : currentWords) {
-                wordList.add(item.english + " - " + item.chinese);
-            }
+        List<WordItem> displayedWords = getCurrentPageWords();
+        
+        for (WordItem item : displayedWords) {
+            wordList.add(item.english + " - " + item.chinese);
         }
         wordAdapter.notifyDataSetChanged();
+
+        updatePageInfo();
+        updatePageButtons();
 
         wordListView.clearChoices();
         for (int i = 0; i < wordListView.getCount(); i++) {
             wordListView.setItemChecked(i, true);
         }
+    }
+
+    private void updatePageInfo() {
+        if (currentWords == null || currentWords.isEmpty()) {
+            tvPageInfo.setText("第 0 / 0 页");
+            return;
+        }
+        
+        int totalPages = (int) Math.ceil((double) currentWords.size() / PAGE_SIZE);
+        tvPageInfo.setText(String.format("第 %d / %d 页", currentPage + 1, totalPages));
+    }
+
+    private void updatePageButtons() {
+        if (currentWords == null || currentWords.isEmpty()) {
+            btnPrevPage.setEnabled(false);
+            btnNextPage.setEnabled(false);
+            return;
+        }
+        
+        btnPrevPage.setEnabled(currentPage > 0);
+        btnNextPage.setEnabled((currentPage + 1) * PAGE_SIZE < currentWords.size());
     }
 }
