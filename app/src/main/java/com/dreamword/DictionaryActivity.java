@@ -31,6 +31,7 @@ public class DictionaryActivity extends AppCompatActivity {
     private List<String> wordList;
     private List<WordItem> currentWords;
     private Grade currentBook;
+    private TextView tvLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +39,12 @@ public class DictionaryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dictionary);
 
         dictionaryManager = DictionaryManager.getInstance();
-        dictionaryManager.loadDictionary();
         wordStore = new WordStore(this);
 
+        tvLoading = findViewById(R.id.tvLoading);
         stageSpinner = findViewById(R.id.spinnerStage);
         bookSpinner = findViewById(R.id.spinnerBook);
         wordListView = findViewById(R.id.lvWords);
-        TextView tvEmpty = findViewById(R.id.tvEmpty);
         CardView btnAddSelected = findViewById(R.id.btnAddSelected);
         CardView btnStartReview = findViewById(R.id.btnStartReview);
         TextView btnBack = findViewById(R.id.btnBack);
@@ -54,7 +54,7 @@ public class DictionaryActivity extends AppCompatActivity {
         wordListView.setAdapter(wordAdapter);
         wordListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        loadStages();
+        loadDictionaryAsync();
 
         stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -126,8 +126,40 @@ public class DictionaryActivity extends AppCompatActivity {
         });
     }
 
+    private void loadDictionaryAsync() {
+        tvLoading.setVisibility(View.VISIBLE);
+        stageSpinner.setEnabled(false);
+        bookSpinner.setEnabled(false);
+
+        dictionaryManager.loadDictionary(new DictionaryManager.LoadCallback() {
+            @Override
+            public void onSuccess() {
+                runOnUiThread(() -> {
+                    tvLoading.setVisibility(View.GONE);
+                    stageSpinner.setEnabled(true);
+                    bookSpinner.setEnabled(true);
+                    loadStages();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    tvLoading.setVisibility(View.GONE);
+                    stageSpinner.setEnabled(true);
+                    bookSpinner.setEnabled(true);
+                    loadStages();
+                    Toast.makeText(DictionaryActivity.this, "网络加载失败，使用本地词库", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
     private void loadStages() {
         List<String> stages = dictionaryManager.getStages();
+        if (stages.isEmpty()) {
+            stages.add("推荐词库");
+        }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, stages);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stageSpinner.setAdapter(adapter);
