@@ -1,21 +1,13 @@
 package com.dreamword.data;
 
-import android.content.Context;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DictionaryManager {
     private static DictionaryManager instance;
-    private final Gson gson = new Gson();
-    private DictionaryData dictionaryData;
     private boolean loaded = false;
+    private List<String> stages = new ArrayList<>();
+    private List<Grade> grades = new ArrayList<>();
 
     public static synchronized DictionaryManager getInstance() {
         if (instance == null) {
@@ -27,49 +19,51 @@ public class DictionaryManager {
     public void loadDictionary() {
         if (loaded) return;
         
-        try {
-            String json = DictionaryData.getDictionaryJson();
-            if (json != null) {
-                Type type = new TypeToken<DictionaryData>() {}.getType();
-                dictionaryData = gson.fromJson(json, type);
-                loaded = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // 创建模拟的内置词典数据
+        stages.add("小学");
+        stages.add("初中");
+        stages.add("高中");
+
+        // 小学词汇
+        Grade primary1 = new Grade();
+        primary1.id = "primary1";
+        primary1.name = "三年级上册";
+        primary1.stage = "小学";
+        primary1.words = new ArrayList<>();
+        primary1.words.add(new WordItem("apple", "苹果"));
+        primary1.words.add(new WordItem("banana", "香蕉"));
+        primary1.words.add(new WordItem("cat", "猫"));
+        grades.add(primary1);
+
+        Grade primary2 = new Grade();
+        primary2.id = "primary2";
+        primary2.name = "三年级下册";
+        primary2.stage = "小学";
+        primary2.words = new ArrayList<>();
+        primary2.words.add(new WordItem("dog", "狗"));
+        primary2.words.add(new WordItem("elephant", "大象"));
+        primary2.words.add(new WordItem("fish", "鱼"));
+        grades.add(primary2);
+
+        loaded = true;
     }
 
     public List<String> getStages() {
-        if (!loaded || dictionaryData == null || dictionaryData.grades == null) {
-            return new ArrayList<>();
-        }
-        List<String> stages = new ArrayList<>();
-        for (Grade grade : dictionaryData.grades) {
-            if (!stages.contains(grade.stage)) {
-                stages.add(grade.stage);
-            }
-        }
         return stages;
     }
 
     public List<Grade> getBooksForStage(String stage) {
-        if (!loaded || dictionaryData == null || dictionaryData.grades == null) {
-            return new ArrayList<>();
-        }
-        List<Grade> books = new ArrayList<>();
-        for (Grade grade : dictionaryData.grades) {
+        List<Grade> result = new ArrayList<>();
+        for (Grade grade : grades) {
             if (grade.stage.equals(stage)) {
-                books.add(grade);
+                result.add(grade);
             }
         }
-        return books;
+        return result;
     }
 
     public Grade getBook(String bookId) {
-        if (!loaded || dictionaryData == null || dictionaryData.grades == null) {
-            return null;
-        }
-        for (Grade grade : dictionaryData.grades) {
+        for (Grade grade : grades) {
             if (grade.id.equals(bookId)) {
                 return grade;
             }
@@ -79,11 +73,6 @@ public class DictionaryManager {
 
     public boolean isLoaded() {
         return loaded;
-    }
-
-    public static class DictionaryData {
-        public String title;
-        public List<Grade> grades;
     }
 
     public static class Grade {
@@ -96,5 +85,12 @@ public class DictionaryManager {
     public static class WordItem {
         public String english;
         public String chinese;
+
+        public WordItem() {}
+
+        public WordItem(String english, String chinese) {
+            this.english = english;
+            this.chinese = chinese;
+        }
     }
 }
