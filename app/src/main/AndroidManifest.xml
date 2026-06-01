@@ -19,5 +19,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AddActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ReviewActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".BookActivity"
+            android:screenOrientation="portrait" />
     </application>
 </manifest>
