@@ -24,6 +24,7 @@ import java.util.List;
 public class DictionaryActivity extends AppCompatActivity {
     private DictionaryManager dictionaryManager;
     private WordStore wordStore;
+    private Spinner versionSpinner;
     private Spinner stageSpinner;
     private Spinner bookSpinner;
     private ListView wordListView;
@@ -42,6 +43,7 @@ public class DictionaryActivity extends AppCompatActivity {
         wordStore = new WordStore(this);
 
         tvLoading = findViewById(R.id.tvLoading);
+        versionSpinner = findViewById(R.id.spinnerVersion);
         stageSpinner = findViewById(R.id.spinnerStage);
         bookSpinner = findViewById(R.id.spinnerBook);
         wordListView = findViewById(R.id.lvWords);
@@ -55,6 +57,16 @@ public class DictionaryActivity extends AppCompatActivity {
         wordListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         loadDictionaryAsync();
+
+        versionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                loadStages();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -128,6 +140,7 @@ public class DictionaryActivity extends AppCompatActivity {
 
     private void loadDictionaryAsync() {
         tvLoading.setVisibility(View.VISIBLE);
+        versionSpinner.setEnabled(false);
         stageSpinner.setEnabled(false);
         bookSpinner.setEnabled(false);
 
@@ -136,9 +149,10 @@ public class DictionaryActivity extends AppCompatActivity {
             public void onSuccess() {
                 runOnUiThread(() -> {
                     tvLoading.setVisibility(View.GONE);
+                    versionSpinner.setEnabled(true);
                     stageSpinner.setEnabled(true);
                     bookSpinner.setEnabled(true);
-                    loadStages();
+                    loadVersions();
                 });
             }
 
@@ -146,19 +160,30 @@ public class DictionaryActivity extends AppCompatActivity {
             public void onError(String error) {
                 runOnUiThread(() -> {
                     tvLoading.setVisibility(View.GONE);
+                    versionSpinner.setEnabled(true);
                     stageSpinner.setEnabled(true);
                     bookSpinner.setEnabled(true);
-                    loadStages();
+                    loadVersions();
                     Toast.makeText(DictionaryActivity.this, "网络加载失败，使用本地词库", Toast.LENGTH_SHORT).show();
                 });
             }
         });
     }
 
+    private void loadVersions() {
+        List<String> versions = dictionaryManager.getVersions();
+        if (versions.isEmpty()) {
+            versions.add("人教版");
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, versions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        versionSpinner.setAdapter(adapter);
+    }
+
     private void loadStages() {
         List<String> stages = dictionaryManager.getStages();
         if (stages.isEmpty()) {
-            stages.add("推荐词库");
+            stages.add("小学");
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, stages);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -166,8 +191,9 @@ public class DictionaryActivity extends AppCompatActivity {
     }
 
     private void loadBooks() {
+        String version = versionSpinner.getSelectedItem().toString();
         String stage = stageSpinner.getSelectedItem().toString();
-        List<Grade> books = dictionaryManager.getBooksForStage(stage);
+        List<Grade> books = dictionaryManager.getBooksForVersionAndStage(version, stage);
         
         List<String> bookNames = new ArrayList<>();
         for (Grade book : books) {
@@ -180,10 +206,11 @@ public class DictionaryActivity extends AppCompatActivity {
     }
 
     private void loadWords() {
+        String version = versionSpinner.getSelectedItem().toString();
         String stage = stageSpinner.getSelectedItem().toString();
         String bookName = bookSpinner.getSelectedItem().toString();
         
-        List<Grade> books = dictionaryManager.getBooksForStage(stage);
+        List<Grade> books = dictionaryManager.getBooksForVersionAndStage(version, stage);
         for (Grade book : books) {
             if (book.name.equals(bookName)) {
                 currentBook = book;
