@@ -14,4 +14,6 @@
     <color name="success_green">#6B9E7A</color>
     <color name="danger_red">#B85C5C</color>
     <color name="white">#FFFFFF</color>
+    <color name="border">#2D6B6B</color>
+    <color name="surface">#1A3D3D</color>
 </resources>

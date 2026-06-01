@@ -74,7 +74,6 @@
                         android:background="@drawable/input_bg"
                         android:textColor="@color/text_cream"
                         android:hint="输入中文或英文..."
-                        android:hintTextColor="@color/text_muted"
                         android:padding="12dp"
                         android:textSize="16sp"/>
                 </LinearLayout>

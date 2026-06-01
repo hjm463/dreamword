@@ -294,7 +294,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gap="12dp"
+                android:weightSum="2"
                 android:layout_marginTop="12dp">
 
                 <androidx.cardview.widget.CardView
@@ -330,6 +330,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginLeft="12dp"
                     app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"

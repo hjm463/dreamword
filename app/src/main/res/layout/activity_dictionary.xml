@@ -156,7 +156,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gap="12dp">
+                android:weightSum="2">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/btnAddSelected"
@@ -191,6 +191,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginLeft="12dp"
                     app:cardBackgroundColor="@color/primary_teal"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
