@@ -46,11 +46,11 @@ public class ReviewActivity extends AppCompatActivity {
         CardView btnCheck = findViewById(R.id.btnCheck);
         CardView btnNext = findViewById(R.id.btnNext);
 
-        btnBack.setOnClickListener(v -> finish());
-        btnPronounce.setOnClickListener(v -> doPronounce());
-        btnShowHint.setOnClickListener(v -> doShowHint());
-        btnCheck.setOnClickListener(v -> doCheckAnswer());
-        btnNext.setOnClickListener(v -> doNextWord());
+        btnBack.setOnClickListener(v -> { try { finish(); } catch (Exception e) { e.printStackTrace(); } });
+        btnPronounce.setOnClickListener(v -> { try { doPronounce(); } catch (Exception e) { e.printStackTrace(); } });
+        btnShowHint.setOnClickListener(v -> { try { doShowHint(); } catch (Exception e) { e.printStackTrace(); } });
+        btnCheck.setOnClickListener(v -> { try { doCheckAnswer(); } catch (Exception e) { e.printStackTrace(); } });
+        btnNext.setOnClickListener(v -> { try { doNextWord(); } catch (Exception e) { e.printStackTrace(); } });
 
         reviewWords = wordStore.getUnmasteredWords();
         if (reviewWords.isEmpty()) {
@@ -81,20 +81,23 @@ public class ReviewActivity extends AppCompatActivity {
         if (reviewWords.isEmpty() || currentIndex >= reviewWords.size()) return;
         String word = reviewWords.get(currentIndex).getEnglish();
         new Thread(() -> {
+            HttpURLConnection conn = null;
+            java.io.InputStream in = null;
+            java.io.ByteArrayOutputStream baos = null;
             try {
                 URL url = new URL("https://dict.youdao.com/dictvoice?type=0&audio=" + java.net.URLEncoder.encode(word, "UTF-8"));
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("User-Agent", "Mozilla/5.0");
                 conn.setConnectTimeout(10000);
-                byte[] data = new byte[conn.getContentLength()];
-                java.io.InputStream in = conn.getInputStream();
-                int total = 0;
-                while (total < data.length) {
-                    int read = in.read(data, total, data.length - total);
-                    if (read < 0) break;
-                    total += read;
+                conn.setReadTimeout(10000);
+                in = conn.getInputStream();
+                baos = new java.io.ByteArrayOutputStream();
+                byte[] buffer = new byte[4096];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    baos.write(buffer, 0, len);
                 }
-                in.close();
+                byte[] data = baos.toByteArray();
 
                 if (data.length > 100) {
                     File tempFile = new File(getCacheDir(), "pron_" + word.replaceAll("[^a-zA-Z0-9_]", "_") + ".mp3");
@@ -119,6 +122,10 @@ public class ReviewActivity extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                try { if (baos != null) baos.close(); } catch (Exception ignored) {}
+                try { if (in != null) in.close(); } catch (Exception ignored) {}
+                if (conn != null) conn.disconnect();
             }
         }).start();
     }

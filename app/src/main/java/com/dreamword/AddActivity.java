@@ -28,8 +28,8 @@ public class AddActivity extends AppCompatActivity {
         TextView btnBack = findViewById(R.id.btnBack);
         CardView btnAddWord = findViewById(R.id.btnAddWord);
 
-        btnBack.setOnClickListener(v -> finish());
-        btnAddWord.setOnClickListener(v -> doAddWord());
+        btnBack.setOnClickListener(v -> { try { finish(); } catch (Exception e) { e.printStackTrace(); } });
+        btnAddWord.setOnClickListener(v -> { try { doAddWord(); } catch (Exception e) { e.printStackTrace(); } });
     }
 
     private void doAddWord() {
@@ -60,7 +60,7 @@ public class AddActivity extends AppCompatActivity {
         }
 
         Pattern chinesePattern = Pattern.compile("[\\u4e00-\\u9fff]");
-        var matcher = chinesePattern.matcher(text);
+        java.util.regex.Matcher matcher = chinesePattern.matcher(text);
         if (matcher.find()) {
             int idx = matcher.start();
             String eng = text.substring(0, idx).trim();

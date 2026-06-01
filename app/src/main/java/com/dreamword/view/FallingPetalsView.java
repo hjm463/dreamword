@@ -82,7 +82,7 @@ public class FallingPetalsView extends View {
         super.onDraw(canvas);
         for (Petal p : petals) {
             paint.setColor(p.color);
-            paint.setAlpha(p.alpha);
+            paint.setAlpha((int) p.alpha);
             canvas.save();
             canvas.translate(p.x, p.y);
             canvas.rotate(p.angle);
